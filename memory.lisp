@@ -67,17 +67,29 @@ frequencies, or 0 if a simplex channel."
 	newchannel))
 
 ;; PAIR-CHANNEL-BANK: have to compute number and pass to parent.
+
 (defmethod channel-from-bank ((bank pair-channel-bank) channel-number)
-  (let* ((channel-num-pos (subchannel-pos bank))
-	 (channel-num (cond
-			((eql channel-num-pos :before)
-			 (subseq channel-number 1))
-			((eql channel-num-pos :after)
-			 channel-number)
-			(t (error 'shouldnt-happen-error)))))
-    (multiple-value-bind (num pos-of-letter)
-	(parse-integer channel-num :junk-allowed t)
-      (error "Replace the let* with a m-v-b!"))))
+  (flet ((parse-letter-after ()
+	   (multiple-value-bind (num pos-of-letter)
+	       (parse-integer channel-number :junk-allowed t)
+	     (cons num (subseq channel-number pos-of-letter))))
+	 (parse-letter-before ()
+	   (cons (parse-integer (subseq channel-number 1) :junk-allowed t)
+		 (subseq channel-number 0 1))))
+    (let* ((subchannel-pos (subchannel-pos bank))
+	   (parsed (cond
+		     ((eql subchannel-pos :before)
+		      (parse-letter-before))
+		     ((eql subchannel-pos :after)
+		      (parse-letter-after))
+		     (t (error 'bad-position))))
+	   (chan-num (car parsed))
+	   (chan-let (cdr parsed))
+	   (chan-pos (1+ (+ (* 2 (- chan-num (channel-bank-start bank)))
+			(cond ((string= chan-let (first-channel-name bank)) 0)
+			      ((string= chan-let (second-channel-name bank)) 1)
+			      (t (error 'bad-subchannel)))))))
+      (call-next-method bank chan-pos))))
 
 (defmethod (setf channel-from-bank) (newchannel (bank pair-channel-bank)
 				     channel-number)
@@ -128,17 +140,6 @@ should be a list with the names and sizes of the memory banks, e.g.
 '((main 1000) (sub 50))."
   (loop for bank in banks
 	   collect (cons (car bank) (new-memory-bank (cdr bank)))))
-
-(defun parse-a-b-channel (channel-number num-edge-pairs)
-  (flet ((is-valid-chan (num a-or-b)
-	   (and (<= 0 num (- num-edge-pairs 1)) (or (string= a-or-b "A")
-						   (string= a-or-b "B")))))
-    (multiple-value-bind (num pos-of-letter)
-	(parse-integer channel-number :junk-allowed t)
-      (let ((letter (subseq channel-number pos-of-letter)))
-	(if (is-valid-chan num letter)
-	    (+ (* 2 num) (if (string= letter "A") 0 1))
-	    (error 'invalid-channel-error :text channel-number))))))
 
 ;; Subclasses of RADIO are generated using the define-radio
 ;; macro.
@@ -199,18 +200,6 @@ instance of MEMORY-CHANNEL."))
 
 (defmethod (setf get-channel) (newchannel (radio radio) bank number)
   (setf (channel-from-bank bank (memory-bank radio bank)) newchannel))
-
-;;;; TODO: Write method to iterate through channels in a bank, doing a
-;;;; multiple-value-bind providing the channel number.  As with
-;;;; get-channel, the overridden forms should be included in the
-;;;; define-radio macro's output.
-
-;;; TODO: Sample upper-lower implementation -- macroize me.
-;;; Take it as a string. 00A/B -> 24A/B in this case
-(defmethod get-channel ((radio ic-r20) (bank (eql 'scan-edge)) channel-number)
-  ;; Scan the input... two numbers and a letter A or B.
-  (call-next-method radio bank
-		    (parse-a-b-channel channel-number 25)))
 
 (defmethod (setf get-channel) (newchannel (radio ic-r20) 
 			       (bank (eql 'scan-edge)) channel-number)
