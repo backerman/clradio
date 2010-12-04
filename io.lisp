@@ -9,7 +9,7 @@
   (let ((resultvar (gensym)))
     `(let ((,resultvar (progn ,@body)))
        (when *debug*
-	 (print ,resultvar))
+         (print ,resultvar))
        ,resultvar)))
 
 (defun read-line-cr (stream)
@@ -17,7 +17,7 @@
    with trailing CR characters removed."
   (debug-print
     (string-trim '(#\Return)
-		 (read-line stream nil))))
+                 (read-line stream nil))))
 
 (defun write-line-cr (line stream &key (read-echo t))
   "Write a line to the given stream, terminating it with
@@ -28,16 +28,16 @@
   (read-line-cr stream)) ;; read back echo from device
 
 (defun output-dump-format (str &optional
-			   (num-octets-in-line 16)
-			   (starting-address 0))
+                           (num-octets-in-line 16)
+                           (starting-address 0))
   "Given a string consisting of a memory dump in
    hex encoding, output it sixteen bytes at a time (by default)
    with the starting address prepended to each line."
   (with-output-to-string (output)
     (let ((strlen (length str))
-	  (pos-increment (* num-octets-in-line 2)))
+          (pos-increment (* num-octets-in-line 2)))
       (do ((pos 0 (+ pos pos-increment))
-	   (addr starting-address (+ addr num-octets-in-line)))
-	  ((>= pos strlen))
-	(format output "~6,'0X ~a~%" addr
-		(subseq str pos (min strlen (+ pos pos-increment))))))))
+           (addr starting-address (+ addr num-octets-in-line)))
+          ((>= pos strlen))
+        (format output "~6,'0X ~a~%" addr
+                (subseq str pos (min strlen (+ pos pos-increment))))))))

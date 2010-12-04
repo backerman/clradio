@@ -7,11 +7,11 @@
   ((frequency :documentation "The frequency of the channel, in Hertz.
 If this channel describes a repeater, the frequency slot should contain
 the output frequency."
-	      :accessor frequency)
+              :accessor frequency)
    (duplex :documentation "The offset between the output and input
 frequencies, or 0 if a simplex channel."
-	   :accessor duplex
-	   :initform 0)
+           :accessor duplex
+           :initform 0)
    tone dcs))
 
 (defclass channel-bank ()
@@ -24,17 +24,17 @@ frequencies, or 0 if a simplex channel."
 
 (defmethod initialize-instance :after ((bank channel-bank) &rest args)
   (setf (slot-value bank 'channels)
-	(make-array (num-channels bank)
-		    :fill-pointer 0
-		    :initial-element nil)))
+        (make-array (num-channels bank)
+                    :fill-pointer 0
+                    :initial-element nil)))
 
 (defclass pair-channel-bank (channel-bank)
   ((first-channel-name :reader first-channel-name
-		       :initarg :first-name)
+                       :initarg :first-name)
    (second-channel-name :reader second-channel-name
-			:initarg :second-name)
+                        :initarg :second-name)
    (subchannel-pos :reader subchannel-pos
-		   :initarg :subchannel-pos))
+                   :initarg :subchannel-pos))
   (:documentation
    "A memory bank in which channels are divided into pairs, such as
    for scan boundaries; e.g., 00A-00B, 01A-01B..."))
@@ -43,9 +43,9 @@ frequencies, or 0 if a simplex channel."
 ;;; of channel pairs n; we create array with 2n positions accordingly.
 (defmethod initialize-instance :after ((bank pair-channel-bank) &rest args)
   (setf (slot-value bank 'channels)
-	(make-array (* 2 (num-channels bank))
-		    :fill-pointer 0
-		    :initial-element nil)))
+        (make-array (* 2 (num-channels bank))
+                    :fill-pointer 0
+                    :initial-element nil)))
 ;;; Radio
 (defclass radio ()
   ((memory :reader radio-memory)
@@ -63,62 +63,62 @@ frequencies, or 0 if a simplex channel."
 
 (defmethod (setf channel-from-bank) (newchannel (bank channel-bank) channel-number)
   (setf (aref (channels bank)
-	      (- channel-number (channel-bank-start bank)))
-	newchannel))
+              (- channel-number (channel-bank-start bank)))
+        newchannel))
 
 ;; PAIR-CHANNEL-BANK: have to compute number and pass to parent.
 
 (defmethod channel-from-bank ((bank pair-channel-bank) channel-number)
   (flet ((parse-letter-after ()
-	   (multiple-value-bind (num pos-of-letter)
-	       (parse-integer channel-number :junk-allowed t)
-	     (cons num (subseq channel-number pos-of-letter))))
-	 (parse-letter-before ()
-	   (cons (parse-integer (subseq channel-number 1) :junk-allowed t)
-		 (subseq channel-number 0 1))))
+           (multiple-value-bind (num pos-of-letter)
+               (parse-integer channel-number :junk-allowed t)
+             (cons num (subseq channel-number pos-of-letter))))
+         (parse-letter-before ()
+           (cons (parse-integer (subseq channel-number 1) :junk-allowed t)
+                 (subseq channel-number 0 1))))
     (let* ((subchannel-pos (subchannel-pos bank))
-	   (parsed (cond
-		     ((eql subchannel-pos :before)
-		      (parse-letter-before))
-		     ((eql subchannel-pos :after)
-		      (parse-letter-after))
-		     (t (error 'bad-position))))
-	   (chan-num (car parsed))
-	   (chan-let (cdr parsed))
-	   (chan-pos (1+ (+ (* 2 (- chan-num (channel-bank-start bank)))
-			(cond ((string= chan-let (first-channel-name bank)) 0)
-			      ((string= chan-let (second-channel-name bank)) 1)
-			      (t (error 'bad-subchannel)))))))
+           (parsed (cond
+                     ((eql subchannel-pos :before)
+                      (parse-letter-before))
+                     ((eql subchannel-pos :after)
+                      (parse-letter-after))
+                     (t (error 'bad-position))))
+           (chan-num (car parsed))
+           (chan-let (cdr parsed))
+           (chan-pos (1+ (+ (* 2 (- chan-num (channel-bank-start bank)))
+                            (cond ((string= chan-let (first-channel-name bank)) 0)
+                                  ((string= chan-let (second-channel-name bank)) 1)
+                                  (t (error 'bad-subchannel)))))))
       (call-next-method bank chan-pos))))
 
 (defmethod (setf channel-from-bank) (newchannel (bank pair-channel-bank)
-				     channel-number)
+                                     channel-number)
   (error 'not-implemented-yet))
 
 
 ;;;; Put any functions here that the macros require.
 (define-condition invalid-channel-error (error)  
- ((text :initarg :text :reader text)))
+  ((text :initarg :text :reader text)))
 
 (defun new-pair-bank (size params)
   "Create and return a new scan-edge bank.
    Params is something like
       (:first #\A :second \#B :subchannel :before)"
   (let ((first-name (getf params :first))
-	(second-name (getf params :second))
-	(subchannel (getf params :subchannel)))
+        (second-name (getf params :second))
+        (subchannel (getf params :subchannel)))
     (make-instance 'pair-channel-bank
-		   :num-channels size
-		   :first-name first-name
-		   :second-name second-name
-		   :subchannel-pos subchannel)))
+                   :num-channels size
+                   :first-name first-name
+                   :second-name second-name
+                   :subchannel-pos subchannel)))
 
 (defun new-memory-bank (params)
   "Create and return a new memory bank based on the supplied parameters."
   (cond
     ;; Just the size of the bank
     ((numberp params) (make-instance 'channel-bank
-				     :num-channels params))
+                                     :num-channels params))
     ;; An atom, but not a number
     ((atom params) (error 'not-implemented-yet-error))
     ;; We have an actual list with parameters and stuff.
@@ -126,11 +126,11 @@ frequencies, or 0 if a simplex channel."
     ;; are keyword-value pairs.
     ((cdr params)
      (let ((size (first params))
-	   (rest (rest params)))
+           (rest (rest params)))
        (cond
-	 ((eql (getf rest :type) 'pair)
-	  (new-pair-bank size rest))
-	 (t (error 'not-implemented-yet-error)))))
+         ((eql (getf rest :type) 'pair)
+          (new-pair-bank size rest))
+         (t (error 'not-implemented-yet-error)))))
     ;; Default -- a list with one element, that being the size
     (t (new-memory-bank (car params)))))
 
@@ -139,30 +139,30 @@ frequencies, or 0 if a simplex channel."
 should be a list with the names and sizes of the memory banks, e.g.
 '((main 1000) (sub 50))."
   (loop for bank in banks
-	   collect (cons (car bank) (new-memory-bank (cdr bank)))))
+     collect (cons (car bank) (new-memory-bank (cdr bank)))))
 
 ;; Subclasses of RADIO are generated using the define-radio
 ;; macro.
 ;; FIXME: slot-form only does read-only slots.  Okay?
 (defmacro define-radio (name configuration-forms)
   (labels ((config-form (param) (assoc param configuration-forms))
-	   (config (param) (let ((x (cdr (config-form param))))
-			     (if (cdr x) x (car x))))
-	   (configured-p (param) (config-form param))
-	   (reader-symbol (param)
-	     (intern (string-upcase
-		      (concatenate 'string "radio-" (symbol-name param)))))
-	   (slot-form-noaccessor (param)
-	     `(,param :initform ,(config param)))
-	   (slot-form (param &optional (init-form (config param)))
-	     (when (configured-p param)
-	       `(,param :initform ,init-form
-			:reader ,(reader-symbol param)))))
+           (config (param) (let ((x (cdr (config-form param))))
+                             (if (cdr x) x (car x))))
+           (configured-p (param) (config-form param))
+           (reader-symbol (param)
+             (intern (string-upcase
+                      (concatenate 'string "radio-" (symbol-name param)))))
+           (slot-form-noaccessor (param)
+             `(,param :initform ,(config param)))
+           (slot-form (param &optional (init-form (config param)))
+             (when (configured-p param)
+               `(,param :initform ,init-form
+                        :reader ,(reader-symbol param)))))
     `(defclass ,name (radio)
        ,(remove nil
-		`(,(slot-form-noaccessor 'model)
-		   ,(slot-form-noaccessor 'make)
-		   ,(slot-form 'memory `(init-memory ',(config 'memory))))))))
+                `(,(slot-form-noaccessor 'model)
+                   ,(slot-form-noaccessor 'make)
+                   ,(slot-form 'memory `(init-memory ',(config 'memory))))))))
 
 ;; TODO: Fix it so I don't have to keyword parameters.  Add support
 ;; for special memory types (to start: A-B).
@@ -170,15 +170,15 @@ should be a list with the names and sizes of the memory banks, e.g.
 ;; This define-radio is here to test the memory model.  Should move it
 ;; out to icom.lisp.
 (define-radio ic-r20
-  ((make                   "Icom")
-   (model                  "IC-R20")
-   (memory                 (main 1000)
-			   (scan-edge 25
-				      :type pair :first #\A :second #\B
-				      :subchannel-pos :after))
-   (emission-modes         :am :cw :usb :lsb :fm :wfm)
-   (tone-squelch-modes     :ctcss :dcs)
-   (frequency-coverage     (50000 2999999999))))
+    ((make                   "Icom")
+     (model                  "IC-R20")
+     (memory                 (main 1000)
+                             (scan-edge 25
+                                        :type pair :first #\A :second #\B
+                                        :subchannel-pos :after))
+     (emission-modes         :am :cw :usb :lsb :fm :wfm)
+     (tone-squelch-modes     :ctcss :dcs)
+     (frequency-coverage     (50000 2999999999))))
 
 (defun memory-bank (radio bank)
   (cdr (assoc bank (radio-memory radio))))
@@ -202,5 +202,5 @@ instance of MEMORY-CHANNEL."))
   (setf (channel-from-bank bank (memory-bank radio bank)) newchannel))
 
 (defmethod (setf get-channel) (newchannel (radio ic-r20) 
-			       (bank (eql 'scan-edge)) channel-number)
+                               (bank (eql 'scan-edge)) channel-number)
   (error 'not-implemented-yet-error))

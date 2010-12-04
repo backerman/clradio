@@ -25,18 +25,18 @@
     (write-line-cr (concatenate 'string "AL~" *radio-model*) tty)
     (let ((status (read-line-cr tty)))
       (if (string= status "OK")
-	  (with-output-to-string (dump)
-	    (do ((pos 0 (+ pos (/ (length line) 2)))
-		 (line (alinco-read-from-position 0 tty)
-		       (alinco-read-from-position pos tty)))
-		;; exit when
-		((string= line "NG"))
-	      (debug-print
-	       (format nil "To read from position ~5,'0X" pos))
-	      (when (= 0 (mod pos #x1000))
-		(format *standard-output* "~5,'0X " pos))
-	      (write-sequence line dump)))
-	  (progn 
-	    (format t "Error: received ~a" status)
-	    (let ((newstatus (read-line-cr tty)))
-	      (format t "Further received ~a" newstatus)))))))
+          (with-output-to-string (dump)
+            (do ((pos 0 (+ pos (/ (length line) 2)))
+                 (line (alinco-read-from-position 0 tty)
+                       (alinco-read-from-position pos tty)))
+                ;; exit when
+                ((string= line "NG"))
+              (debug-print
+               (format nil "To read from position ~5,'0X" pos))
+              (when (= 0 (mod pos #x1000))
+                (format *standard-output* "~5,'0X " pos))
+              (write-sequence line dump)))
+          (progn 
+            (format t "Error: received ~a" status)
+            (let ((newstatus (read-line-cr tty)))
+              (format t "Further received ~a" newstatus)))))))
