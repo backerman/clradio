@@ -3,12 +3,14 @@
 
 (defparameter *crlf* (format nil "~C~C" #\Return #\Linefeed))
 
+(defparameter *debug-print* nil)
+
 (defmacro debug-print (&body body)
   "Evaluate the body exactly once and answer its value.  If *debug* is
    non-nil, also print the result to *standard-output*."
   (let ((resultvar (gensym)))
     `(let ((,resultvar (progn ,@body)))
-       (when *debug*
+       (when *debug-print*
          (print ,resultvar))
        ,resultvar)))
 

@@ -8,8 +8,6 @@
 
 (defparameter *radio-model* "DJ-G7T")
 
-(defparameter *debug* nil)
-
 (defun alinco-read-memory-command (start)
   "Return the radio command to read memory from the provided start location."
   (format nil "AL~~F~5,'0XR" start))
