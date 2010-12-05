@@ -11,8 +11,8 @@
   :description "Radio memory stuff thingy."
   :components
   ((:file "packages")
-   (:file "alinco" :depends-on ("packages" "serial"))
-   (:file "memory" :depends-on ("packages"))
-   (:file "serial" :depends-on ("packages"))
-   (:file "io"     :depends-on ("packages")))
+   (:file "alinco-comm" :depends-on ("packages" "serial"))
+   (:file "memory"      :depends-on ("packages"))
+   (:file "serial"      :depends-on ("packages"))
+   (:file "io"          :depends-on ("packages")))
   :depends-on (:alexandria))
