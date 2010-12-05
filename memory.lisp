@@ -207,7 +207,3 @@ should be a list with the names and sizes of the memory banks, e.g.
 
 (defmethod (setf get-channel) (newchannel (radio radio) bank number)
   (setf (channel-from-bank bank (memory-bank radio bank)) newchannel))
-
-(defmethod (setf get-channel) (newchannel (radio ic-r20) 
-                               (bank (eql 'scan-edge)) channel-number)
-  (error 'not-implemented-yet-error))
