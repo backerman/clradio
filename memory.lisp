@@ -68,8 +68,8 @@ frequencies, or 0 if a simplex channel."
 
 ;; PAIR-CHANNEL-BANK: have to compute number and pass to parent.
 
-(defmethod channel-from-bank ((bank pair-channel-bank) channel-number)
-  (flet ((parse-letter-after ()
+(defun parse-pair-channel-num (bank channel-number)
+   (flet ((parse-letter-after ()
            (multiple-value-bind (num pos-of-letter)
                (parse-integer channel-number :junk-allowed t)
              (cons num (subseq channel-number pos-of-letter))))
@@ -84,17 +84,22 @@ frequencies, or 0 if a simplex channel."
                       (parse-letter-after))
                      (t (error 'bad-position))))
            (chan-num (car parsed))
-           (chan-let (cdr parsed))
-           (chan-pos (1+ (+ (* 2 (- chan-num (channel-bank-start bank)))
-                            (cond ((string= chan-let (first-channel-name bank)) 0)
-                                  ((string= chan-let (second-channel-name bank)) 1)
-                                  (t (error 'bad-subchannel)))))))
-      (call-next-method bank chan-pos))))
+           (chan-let (cdr parsed)))
+      ;; Re-add the start offset to the parsed channel number, as
+      ;; it will be subtracted in the superclass.
+      (+ (+ (* 2 (- chan-num (channel-bank-start bank)))
+            (cond ((string= chan-let (first-channel-name bank)) 0)
+                  ((string= chan-let (second-channel-name bank)) 1)
+                  (t (error 'bad-subchannel))))
+         (channel-bank-start bank)))))
+
+(defmethod channel-from-bank ((bank pair-channel-bank) channel-number)
+  (call-next-method bank (parse-pair-channel-num bank channel-number)))
 
 (defmethod (setf channel-from-bank) (newchannel (bank pair-channel-bank)
                                      channel-number)
-  (error 'not-implemented-yet))
-
+  (call-next-method newchannel bank
+                    (parse-pair-channel-num bank channel-number)))
 
 ;;;; Put any functions here that the macros require.
 (define-condition invalid-channel-error (error)  
