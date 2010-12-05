@@ -61,7 +61,8 @@ frequencies, or 0 if a simplex channel."
 (defmethod channel-from-bank ((bank channel-bank) channel-number)
   (aref (channels bank) (- channel-number (channel-bank-start bank))))
 
-(defmethod (setf channel-from-bank) (newchannel (bank channel-bank) channel-number)
+(defmethod (setf channel-from-bank)
+    (newchannel (bank channel-bank) channel-number)
   (setf (aref (channels bank)
               (- channel-number (channel-bank-start bank)))
         newchannel))
@@ -167,7 +168,8 @@ should be a list with the names and sizes of the memory banks, e.g.
        ,(remove nil
                 `(,(slot-form-noaccessor 'model)
                    ,(slot-form-noaccessor 'make)
-                   ,(slot-form 'memory `(init-memory ',(config 'memory))))))))
+                   ,(slot-form 'memory
+                               `(init-memory ',(config 'memory))))))))
 
 ;; TODO: Fix it so I don't have to keyword parameters.  Add support
 ;; for special memory types (to start: A-B).
@@ -196,7 +198,7 @@ should be a list with the names and sizes of the memory banks, e.g.
 
 (defgeneric (setf get-channel) (newchannel radio bank number)
   (:documentation "Replace the memory channel at a given location with a new
-instance of MEMORY-CHANNEL."))
+                   instance of MEMORY-CHANNEL."))
 
 ;;; Define generic implementation, just in case we're overriding
 ;;; later.
