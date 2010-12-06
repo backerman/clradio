@@ -175,22 +175,6 @@ should be a list with the names and sizes of the memory banks, e.g.
                        ,(slot-form 'emission-modes)
                        ,(slot-form-is-list 'frequency-coverage))))))
 
-;; TODO: Fix it so I don't have to keyword parameters.  Add support
-;; for special memory types (to start: A-B).
-;;
-;; This define-radio is here to test the memory model.  Should move it
-;; out to icom.lisp.
-(define-radio ic-r20
-    ((make                   "Icom")
-     (model                  "IC-R20")
-     (memory                 (main 1000)
-                             (scan-edge 25
-                                        :type pair :first #\A :second #\B
-                                        :subchannel-pos :after))
-     (emission-modes         :am :cw :usb :lsb :fm :wfm)
-     (tone-squelch-modes     :ctcss :dcs)
-     (frequency-coverage     (50000 2999999999))))
-
 (defun memory-bank (radio bank)
   (cdr (assoc bank (radio-memory radio))))
 
