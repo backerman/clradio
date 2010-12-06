@@ -15,6 +15,7 @@
    (:file "memory"        :depends-on ("packages"))
    (:file "serial"        :depends-on ("packages"))
    (:file "io"            :depends-on ("packages"))
+   (:file "squelch"       :depends-on ("packages"))
    ;; Radio descriptions
    (:file "icom"          :depends-on ("packages"))
    ;; Tests
