@@ -162,14 +162,18 @@ should be a list with the names and sizes of the memory banks, e.g.
              `(,param :initform ,(config param)))
            (slot-form (param &optional (init-form (config param)))
              (when (configured-p param)
-               `(,param :initform ,init-form
-                        :reader ,(reader-symbol param)))))
+               `(,param :initform ',init-form
+                        :reader ,(reader-symbol param))))
+           (slot-form-is-list (param &optional
+                                     (init-form (cdr (config-form param))))
+             (slot-form param init-form)))
     `(defclass ,name (radio)
-       ,(remove nil
-                `(,(slot-form-noaccessor 'model)
-                   ,(slot-form-noaccessor 'make)
-                   ,(slot-form 'memory
-                               `(init-memory ',(config 'memory))))))))
+       ,(remove nil `(,(slot-form-noaccessor 'model)
+                       ,(slot-form-noaccessor 'make)
+                       ,(slot-form 'memory
+                                   `(init-memory ',(config 'memory)))
+                       ,(slot-form 'emission-modes)
+                       ,(slot-form-is-list 'frequency-coverage))))))
 
 ;; TODO: Fix it so I don't have to keyword parameters.  Add support
 ;; for special memory types (to start: A-B).
@@ -207,3 +211,13 @@ should be a list with the names and sizes of the memory banks, e.g.
 
 (defmethod (setf get-channel) (newchannel (radio radio) bank number)
   (setf (channel-from-bank bank (memory-bank radio bank)) newchannel))
+
+;;; Frequency coverage check
+(defun frequency-valid (radio frequency emission-mode)
+  "Return true iff the given frequency (in Hertz) can be tuned
+   by this radio using the given emission mode."
+  (and (find emission-mode (radio-emission-modes radio))
+  (loop
+     for range in (radio-frequency-coverage radio)
+       thereis (and (>= frequency (first range))
+                    (<= frequency (second range))))))
