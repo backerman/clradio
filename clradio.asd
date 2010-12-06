@@ -7,7 +7,7 @@
   :author "Brad Ackerman <brad@facefault.org>"
   :version "0.1"
   :maintainer "Brad Ackerman <brad@facefault.org>"
-  :licence "BSD"
+  :licence "ISC for serial.lisp; rest is WTFPL"
   :description "Radio memory stuff thingy."
   :components
   ((:file "packages")
