@@ -29,3 +29,16 @@
 
 (defparameter *squelch-modes*
   (list :off :tsql :dcs :vsc))
+
+(defun valid-dcs-words () *dcs-words*)
+
+(defun valid-dcs-polarities () *dcs-polarities*)
+
+(defun valid-ctcss-tones () *ctcss-tones*)
+
+(defun valid-squelch-modes () *squelch-modes*)
+
+(defun valid-dcs-word (word polarity)
+  (and
+   (find polarity (valid-dcs-polarities))
+   (find word (valid-dcs-words))))
