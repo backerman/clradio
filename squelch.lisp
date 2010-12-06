@@ -2,7 +2,7 @@
 
 (in-package :org.facefault.clradio)
 
-(defparameter *dcs-words*
+(defvar *dcs-words*
   (list "023" "025" "026" "031" "032" "036" "043" "047"
         "051" "053" "054" "065" "071" "072" "073" "074" "114" "115"
         "116" "122" "125" "131" "132" "134" "143" "145" "152" "155"
@@ -15,10 +15,10 @@
         "612" "624" "627" "631" "632" "654" "662" "664" "703" "712"
         "723" "731" "731" "734" "743" "754"))
 
-(defparameter *dcs-polarities*
+(defvar *dcs-polarities*
   (list :positive :negative))
 
-(defparameter *ctcss-tones*
+(defvar *ctcss-tones*
   (list "67.0" "69.3" "71.9" "74.4" "77.0" "79.7" "82.5"
         "85.4" "88.5" "91.5" "94.8" "97.4" "100.0" "103.5" "107.2"
         "110.9" "114.8" "118.8" "123.0" "127.3" "131.8" "136.5" "141.3"
@@ -27,7 +27,7 @@
         "199.5" "203.5" "206.5" "210.7" "218.1" "225.7" "229.1" "233.6"
         "241.8" "250.3" "254.1"))
 
-(defparameter *squelch-modes*
+(defvar *squelch-modes*
   (list :off :tsql :dcs :vsc))
 
 (defun valid-dcs-words () *dcs-words*)
