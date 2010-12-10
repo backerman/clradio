@@ -41,6 +41,8 @@ frequencies, or 0 if a simplex channel."
 
 ;;; Initialize PAIR-CHANNEL-BANK... user passes in number
 ;;; of channel pairs n; we create array with 2n positions accordingly.
+;;; FIXME: this is being called after less specific method,
+;;; which is excessive.
 (defmethod initialize-instance :after ((bank pair-channel-bank) &rest args)
   (setf (slot-value bank 'channels)
         (make-array (* 2 (num-channels bank))
@@ -166,12 +168,16 @@ should be a list with the names and sizes of the memory banks, e.g.
                         :reader ,(reader-symbol param))))
            (slot-form-is-list (param &optional
                                      (init-form (cdr (config-form param))))
-             (slot-form param init-form)))
+             (slot-form param init-form))
+           (slot-form-no-quote (param &optional (init-form (config param)))
+             (when (configured-p param)
+               `(,param :initform ,init-form
+                        :reader ,(reader-symbol param)))))
     `(defclass ,name (radio)
        ,(remove nil `(,(slot-form-noaccessor 'model)
                        ,(slot-form-noaccessor 'make)
-                       ,(slot-form 'memory
-                                   `(init-memory ',(config 'memory)))
+                       ,(slot-form-no-quote 'memory
+                                            `(init-memory ',(config 'memory)))
                        ,(slot-form 'emission-modes)
                        ,(slot-form-is-list 'frequency-coverage))))))
 
