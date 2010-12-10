@@ -28,7 +28,7 @@
         "241.8" "250.3" "254.1"))
 
 (defvar *squelch-modes*
-  (list :off :tsql :dcs :vsc))
+  (list :off :ctcss :dcs :vsc))
 
 (defun valid-dcs-words () *dcs-words*)
 

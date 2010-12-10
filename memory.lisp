@@ -7,12 +7,28 @@
   ((frequency :documentation "The frequency of the channel, in Hertz.
 If this channel describes a repeater, the frequency slot should contain
 the output frequency."
-              :accessor frequency)
+              :accessor frequency
+              :initform 0)
    (duplex :documentation "The offset between the output and input
 frequencies, or 0 if a simplex channel."
            :accessor duplex
            :initform 0)
-   tone dcs))
+   (ctcss :documentation "The CTCSS tone assigned to this channel,
+   as a string."
+          :accessor ctcss-tone
+          :initform nil)
+   (dcs :documentation "The DCS word assigned to this channel, as a string.
+   Example: \"023\""
+        :accessor dcs-word
+        :initform nil)
+   (dcs-polarity :documentation "The polarity of this channel's assigned DCS
+   word; either :positive or :negative."
+                 :accessor dcs-polarity
+                 :initform nil)
+   (squelch-mode :documentation "The squelch mode selected for this channel.
+   Valid choices: :ctcss, :dcs, :vsc, or :off"
+                 :accessor squelch-mode
+                 :initform :off)))
 
 (defclass channel-bank ()
   ((numchannels :reader num-channels :initarg :num-channels)
