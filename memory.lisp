@@ -70,6 +70,11 @@ frequencies, or 0 if a simplex channel."
    (make :reader radio-make :allocation class)
    (model :reader radio-model :allocation class)))
 
+(defmethod print-object ((object radio) stream)
+  (print-unreadable-object (object stream :type t :identity t)
+    (with-slots (make model) object
+        (format stream "(~a ~a)" make model))))
+
 ;;; Getting/setting memory channels
 (defgeneric channel-from-bank (bank channel-number))
 
