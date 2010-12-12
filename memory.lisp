@@ -30,6 +30,12 @@ frequencies, or 0 if a simplex channel."
                  :accessor squelch-mode
                  :initform :off)))
 
+(defmethod print-object ((object memory-channel) stream)
+  (print-unreadable-object (object stream :type t)
+    (with-slots (frequency duplex ctcss dcs dcs-polarity squelch-mode) object
+      (format stream "~a Hz dup ~a Hz CTCSS ~a Hz DCS ~a ~a squelch ~a"
+              frequency duplex ctcss dcs dcs-polarity squelch-mode))))
+
 (defclass channel-bank ()
   ((numchannels :reader num-channels :initarg :num-channels)
    (channels :reader channels)
